@@ -35,35 +35,55 @@ import android.graphics.PorterDuff.Mode;
 
 
 public class MainActivity extends Activity {
-	MediaPlayer mp;
-	ArrayList<Song> songList = new ArrayList<Song>();
-	ListView list;
-	Button playButton, nextButton, previousButton;
-	Boolean stop, update = false, startPlay = false;
-	int x = 1;
-	int count = 1;
-	int currentSong = 0, position = 0;
+	private MediaPlayer mp;
+	private ArrayList<Song> songList = new ArrayList<Song>();
+	private ListView list;
+	private Button playButton, nextButton, previousButton;
+	private Boolean stop, update = false, startPlay = false;
+	private int x = 1;
+	private int count = 1;
+	private int currentSong = 0, position = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		/**
+		 * Sets up the local instances of the buttons and the list.
+		 */
 		list = (ListView)findViewById(R.id.list);
 		playButton = (Button)findViewById(R.id.playButton);
 		previousButton = (Button) findViewById(R.id.previousSong);
 		nextButton = (Button) findViewById(R.id.nextSong);
 		
+		/**
+		 * Sets up the default visual elements for the buttons
+		 */
 		playButton.setBackgroundResource(R.drawable.playpressed);
 		previousButton.setBackgroundResource(R.drawable.previouspressed);
 		nextButton.setBackgroundResource(R.drawable.nextpressed);
+		
+		/**
+		 * ListView configurations to improve performance.
+		 */
 		list.setCacheColorHint(Color.TRANSPARENT);
 		list.setFastScrollEnabled(true);
 		list.setScrollingCacheEnabled(false);
 		
+		/**
+		 * Beings the Asynchronous task to populate the list.
+		 */
 		new PopulateList(this, list).execute();
+		
+		/**
+		 * Initialises the MediaPlayer variable mp.
+		 */
 		mp = new MediaPlayer();
 		
+		/**
+		 * Calls the methods that set up the listeners.
+		 */
 		this.setMediaPlayerListeners();
 		this.setListListeners();
 		this.setPlayButtonListeners();
@@ -84,16 +104,20 @@ public class MainActivity extends Activity {
 						break;
 					case MotionEvent.ACTION_DOWN:
 						if(!mp.isPlaying()){
+							//If down and not playing the button is set to the "playpressed" state.
 							playButton.setBackgroundResource(R.drawable.playpressed);
 						}else{
+							//If down and is playing the button is set to a "pausepressed" state.
 							playButton.setBackgroundResource(R.drawable.pausepressed);
 						}
 						break;
 					case MotionEvent.ACTION_UP:
 						if (!mp.isPlaying()){
+							//If released and is not playing the button is set to "pause" state.
 							playButton.setBackgroundResource(R.drawable.pause);
 							mp.start();
 						} else {
+							//if released and is playing the music is paused and the button is set to play.
 							playButton.setBackgroundResource(R.drawable.play);
 							mp.pause();
 						}
@@ -120,35 +144,22 @@ public class MainActivity extends Activity {
 					case MotionEvent.ACTION_CANCEL:
 						break;
 					case MotionEvent.ACTION_DOWN:
+						//Whilst the button is held the image is changed to a blue version of the original.
 						nextButton.setBackgroundResource(R.drawable.nextpressed);
 						break;
 					case MotionEvent.ACTION_UP:
-						try {
-							nextButton.setBackgroundResource(R.drawable.next);
-							currentSong++;
-							if (currentSong < songList.size()){
-								mp.stop();
-								mp.reset();
-								mp.setDataSource(songList.get(currentSong).getSongUrl());
-								getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-								mp.prepare();
-								mp.start();
-							} else {
-								startPlay = true;
-								new PopulateList(MainActivity.this, list).execute();
-							}
-						} catch (IllegalArgumentException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (SecurityException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IllegalStateException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+						//When the button is release it reverts to it's original state.
+						nextButton.setBackgroundResource(R.drawable.next);
+						//Increments the current song pointer.
+						currentSong++;
+						//checks to see if the song is in the bounds of the current list.
+						if (currentSong < songList.size()){
+							//Plays the song if in bounds.
+							playSong(currentSong);
+						} else {
+							//sets start play to true and calls populate list - becuase this is true the next song will play once the list is updated.
+							startPlay = true;
+							new PopulateList(MainActivity.this, list).execute();
 						}
 					}
 				}
@@ -164,32 +175,16 @@ public class MainActivity extends Activity {
 		mp.setOnCompletionListener(new OnCompletionListener(){
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				try {
-					currentSong++;
-					if (currentSong < songList.size()){
-						mp.stop();
-						mp.reset();
-						mp.setDataSource(songList.get(currentSong).getSongUrl());
-						getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-						mp.prepare();
-						mp.start();
-					} else {
-						startPlay = true;
-						new PopulateList(MainActivity.this, list).execute();
-					}
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				//Increments the currentSong pointer.	
+				currentSong++;
+				//Checks to see
+				if (currentSong < songList.size()){
+					playSong(currentSong);
+				} else {
+					startPlay = true;
+					new PopulateList(MainActivity.this, list).execute();
 				}
+				
 			}
 
 		});
@@ -205,7 +200,6 @@ public class MainActivity extends Activity {
 				public void onItemClick(AdapterView<?> parent, View view,
 						int position, long id) {
 					
-					currentSong = position;
 					
 					playButton.setBackgroundResource(R.drawable.pause);
 					
@@ -216,30 +210,36 @@ public class MainActivity extends Activity {
 					
 					nextButton.setBackgroundResource(R.drawable.next);
 					
-					try {
-						mp.stop();
-						mp.reset();
-						mp.setDataSource(songList.get(position).getSongUrl());
-						getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-						mp.prepare();
-						update = true;
-						mp.start();
-					} catch (IllegalArgumentException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IllegalStateException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					currentSong = position;
+					playSong(position);
 				}
 			});
 	}
+	
+	private void playSong(int index){
+		try {
+			mp.stop();
+			mp.reset();
+			mp.setDataSource(songList.get(index).getSongUrl());
+			getActionBar().setTitle(songList.get(index).getSongTitle());
+			mp.prepare();
+			update = true;
+			mp.start();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 	/**
 	 * Class that pulls down and populates the list view with data.
@@ -279,21 +279,7 @@ public class MainActivity extends Activity {
 			position += 40;
 			
 			if(startPlay){	
-				try {
-					mp.stop();
-					mp.reset();
-					mp.setDataSource(songList.get(currentSong).getSongUrl());
-					getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-					mp.prepare();
-					mp.start();
-					startPlay = false;
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				playSong(currentSong);
 			}
 			
 			this.progressDialog.dismiss();
@@ -309,14 +295,7 @@ public class MainActivity extends Activity {
 					this.jsonArray = new JSONArray(json);
 					for (int x = 0; x < 40; x++){
 						JSONObject currObj = this.jsonArray.getJSONObject(x);
-						try {
-							URL url = new URL(currObj.getString("avatar"));
-							Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-							songList.add(new Song(currObj.getString("file"), bmp, currObj.getString("author"), currObj.getString("title")));
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+							songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title")));
 					}
 
 			} catch (JSONException e) {
@@ -326,7 +305,6 @@ public class MainActivity extends Activity {
 			
 			return null;
 		}
-		
 	}
 	
 	class EndlessScrollListener implements OnScrollListener {

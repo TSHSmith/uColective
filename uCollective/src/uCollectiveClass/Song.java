@@ -7,10 +7,12 @@ public class Song {
 	private Bitmap image;
 	private String artistName;
 	private String songTitle;
+	private Boolean hasImage = false;
+	private String imageUrl;
 	
-	public Song(String songUrl, Bitmap image, String artistName, String songTitle){
+	public Song(String songUrl, String imageUrl, String artistName, String songTitle){
 		this.songUrl = songUrl;
-		this.image = image;
+		this.imageUrl = imageUrl;
 		this.artistName = artistName;
 		this.songTitle = songTitle;
 	}
@@ -28,5 +30,21 @@ public class Song {
 	
 	public String getArtistName(){
 		return this.artistName;
+	}
+	
+	public String getImageUrl(){
+		return this.imageUrl;
+	}
+	
+	public Boolean getHasImage(){
+		return hasImage;
+	}
+	
+	public void setHasImage(Boolean hasImage){
+		this.hasImage = hasImage;
+	}
+	
+	public void saveDownloadedImage(Bitmap image){
+		this.image = image;
 	}
 }
