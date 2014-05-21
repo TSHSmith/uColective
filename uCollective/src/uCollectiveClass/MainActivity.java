@@ -57,6 +57,10 @@ public class MainActivity extends Activity {
 		previousButton = (Button) findViewById(R.id.previousSong);
 		nextButton = (Button) findViewById(R.id.nextSong);
 		
+		playButton.setClickable(false);
+		previousButton.setClickable(false);
+		nextButton.setClickable(false);
+		
 		/**
 		 * Sets up the default visual elements for the buttons
 		 */
@@ -88,6 +92,7 @@ public class MainActivity extends Activity {
 		this.setListListeners();
 		this.setPlayButtonListeners();
 		this.setNextButtonListeners();
+		this.setPreviousSongListeners();
 	}
 	
 	/**
@@ -161,6 +166,12 @@ public class MainActivity extends Activity {
 							startPlay = true;
 							new PopulateList(MainActivity.this, list).execute();
 						}
+						
+						if (currentSong > 0){
+							previousButton.setEnabled(true);
+							previousButton.setBackgroundResource(R.drawable.previous);
+						}
+						break;
 					}
 				}
 				return false;
@@ -185,6 +196,11 @@ public class MainActivity extends Activity {
 					new PopulateList(MainActivity.this, list).execute();
 				}
 				
+				if (currentSong < 0){
+					previousButton.setEnabled(true);
+					previousButton.setBackgroundResource(R.drawable.next);
+				}
+				
 			}
 
 		});
@@ -201,12 +217,19 @@ public class MainActivity extends Activity {
 						int position, long id) {
 					
 					
+					playButton.setClickable(true);
+					nextButton.setClickable(true);
+					
 					playButton.setBackgroundResource(R.drawable.pause);
 					
-					if(position > 0)
+					if(position > 0){
 						previousButton.setBackgroundResource(R.drawable.previous);
-					else
+						previousButton.setClickable(true);
+					}
+					else{
 						previousButton.setBackgroundResource(R.drawable.previouspressed);
+						previousButton.setClickable(false);
+					}
 					
 					nextButton.setBackgroundResource(R.drawable.next);
 					
@@ -214,6 +237,32 @@ public class MainActivity extends Activity {
 					playSong(position);
 				}
 			});
+	}
+	
+	private void setPreviousSongListeners(){
+		previousButton.setOnTouchListener(new View.OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				switch(event.getAction()){
+					case MotionEvent.ACTION_DOWN:
+						previousButton.setBackgroundResource(R.drawable.previouspressed);
+						break;
+					case MotionEvent.ACTION_UP:
+						previousButton.setBackgroundResource(R.drawable.previous);
+						if(currentSong - 1 >= 0 ){
+							currentSong--;
+							playSong(currentSong);
+							if(currentSong == 0){
+								previousButton.setEnabled(false);
+								previousButton.setBackgroundResource(R.drawable.previouspressed);
+							}
+						} 
+						break;
+				}
+				return false;
+			}
+		});
 	}
 	
 	private void playSong(int index){
