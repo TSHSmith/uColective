@@ -39,10 +39,10 @@ public class MainActivity extends Activity {
 	ArrayList<Song> songList = new ArrayList<Song>();
 	ListView list;
 	Button playButton, nextButton, previousButton;
-	Boolean stop, update = false;
+	Boolean stop, update = false, startPlay = false;
 	int x = 1;
 	int count = 1;
-	int currentSong = 0;
+	int currentSong = 0, position = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -125,13 +125,18 @@ public class MainActivity extends Activity {
 					case MotionEvent.ACTION_UP:
 						try {
 							nextButton.setBackgroundResource(R.drawable.next);
-							mp.stop();
-							mp.reset();
 							currentSong++;
-							mp.setDataSource(songList.get(currentSong).getSongUrl());
-							getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-							mp.prepare();
-							mp.start();
+							if (currentSong < songList.size()){
+								mp.stop();
+								mp.reset();
+								mp.setDataSource(songList.get(currentSong).getSongUrl());
+								getActionBar().setTitle(songList.get(currentSong).getSongTitle());
+								mp.prepare();
+								mp.start();
+							} else {
+								startPlay = true;
+								new PopulateList(MainActivity.this, list).execute();
+							}
 						} catch (IllegalArgumentException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -160,13 +165,18 @@ public class MainActivity extends Activity {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				try {
-					mp.stop();
-					mp.reset();
 					currentSong++;
-					mp.setDataSource(songList.get(currentSong).getSongUrl());
-					getActionBar().setTitle(songList.get(currentSong).getSongTitle());
-					mp.prepare();
-					mp.start();
+					if (currentSong < songList.size()){
+						mp.stop();
+						mp.reset();
+						mp.setDataSource(songList.get(currentSong).getSongUrl());
+						getActionBar().setTitle(songList.get(currentSong).getSongTitle());
+						mp.prepare();
+						mp.start();
+					} else {
+						startPlay = true;
+						new PopulateList(MainActivity.this, list).execute();
+					}
 				} catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -265,8 +275,27 @@ public class MainActivity extends Activity {
 			ListInflator adapter = new ListInflator(this.mainActivity, songList);
 			list.setAdapter(adapter);
 			list.setOnScrollListener(new EndlessScrollListener());
-			list.setSelection(currentSong);
-			currentSong += 40;
+			list.setSelection(position);
+			position += 40;
+			
+			if(startPlay){	
+				try {
+					mp.stop();
+					mp.reset();
+					mp.setDataSource(songList.get(currentSong).getSongUrl());
+					getActionBar().setTitle(songList.get(currentSong).getSongTitle());
+					mp.prepare();
+					mp.start();
+					startPlay = false;
+				} catch (IllegalStateException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
 			this.progressDialog.dismiss();
 		}
 		
