@@ -35,12 +35,14 @@
         android:layout_alignBottom="@+id/playButton"
         android:layout_toLeftOf="@+id/playButton" />
 
+
     <Button
         android:id="@+id/nextSong"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/list"
         android:layout_toRightOf="@+id/playButton" />
+
 
 
 
