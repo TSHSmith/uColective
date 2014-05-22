@@ -15,6 +15,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/playButton"
         android:layout_marginBottom="10dp"
+        android:scrollbarThumbVertical="@drawable/custom_scroller"
         >
         
     </ListView>

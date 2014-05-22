@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import learn2crack.customlistview.R;
 
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,6 +16,9 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
@@ -39,10 +43,17 @@ public class MainActivity extends Activity {
 	private ArrayList<Song> songList = new ArrayList<Song>();
 	private ListView list;
 	private Button playButton, nextButton, previousButton;
-	private Boolean stop, update = false, startPlay = false;
+	private Boolean stop, update = false, startPlay = false, randomMode = false;
 	private int x = 1;
 	private int count = 1;
 	private int currentSong = 0, position = 0;
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu){
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +106,25 @@ public class MainActivity extends Activity {
 		this.setPreviousSongListeners();
 	}
 	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item){
+		switch (item.getItemId()){
+			case R.id.random_mode:
+				new getRandomSong(MainActivity.this).execute();
+				randomMode = true;
+				previousButton.setBackgroundResource(R.drawable.previouspressed);
+				previousButton.setClickable(false);
+				playButton.setClickable(true);
+				nextButton.setClickable(true);
+				
+				playButton.setBackgroundResource(R.drawable.pause);
+				nextButton.setBackgroundResource(R.drawable.next);
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	/**
 	 * Sets up the listener for the playButton
 	 */
@@ -128,9 +158,7 @@ public class MainActivity extends Activity {
 						}
 						break;
 					}
-					
 				}
-				
 				return false;
 			}
 		});
@@ -144,34 +172,46 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
-				if(mp != null){
+				if(randomMode){
 					switch(event.getAction()){
-					case MotionEvent.ACTION_CANCEL:
-						break;
-					case MotionEvent.ACTION_DOWN:
-						//Whilst the button is held the image is changed to a blue version of the original.
-						nextButton.setBackgroundResource(R.drawable.nextpressed);
-						break;
-					case MotionEvent.ACTION_UP:
-						//When the button is release it reverts to it's original state.
-						nextButton.setBackgroundResource(R.drawable.next);
-						//Increments the current song pointer.
-						currentSong++;
-						//checks to see if the song is in the bounds of the current list.
-						if (currentSong < songList.size()){
-							//Plays the song if in bounds.
-							playSong(currentSong);
-						} else {
-							//sets start play to true and calls populate list - becuase this is true the next song will play once the list is updated.
-							startPlay = true;
-							new PopulateList(MainActivity.this, list).execute();
+						case MotionEvent.ACTION_DOWN:
+							nextButton.setBackgroundResource(R.drawable.nextpressed);
+							break;
+						case MotionEvent.ACTION_UP:
+							nextButton.setBackgroundResource(R.drawable.next);
+							new getRandomSong(MainActivity.this).execute();
+							break;
+					}
+				}else{
+					if(mp != null){
+						switch(event.getAction()){
+						case MotionEvent.ACTION_CANCEL:
+							break;
+						case MotionEvent.ACTION_DOWN:
+							//Whilst the button is held the image is changed to a blue version of the original.
+							nextButton.setBackgroundResource(R.drawable.nextpressed);
+							break;
+						case MotionEvent.ACTION_UP:
+							//When the button is release it reverts to it's original state.
+							nextButton.setBackgroundResource(R.drawable.next);
+							//Increments the current song pointer.
+							currentSong++;
+							//checks to see if the song is in the bounds of the current list.
+							if (currentSong < songList.size()){
+								//Plays the song if in bounds.
+								playSong(currentSong);
+							} else {
+								//sets start play to true and calls populate list - becuase this is true the next song will play once the list is updated.
+								startPlay = true;
+								new PopulateList(MainActivity.this, list).execute();
+							}
+							
+							if (currentSong > 0){
+								previousButton.setEnabled(true);
+								previousButton.setBackgroundResource(R.drawable.previous);
+							}
+							break;
 						}
-						
-						if (currentSong > 0){
-							previousButton.setEnabled(true);
-							previousButton.setBackgroundResource(R.drawable.previous);
-						}
-						break;
 					}
 				}
 				return false;
@@ -186,23 +226,25 @@ public class MainActivity extends Activity {
 		mp.setOnCompletionListener(new OnCompletionListener(){
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				//Increments the currentSong pointer.	
-				currentSong++;
-				//Checks to see
-				if (currentSong < songList.size()){
-					playSong(currentSong);
-				} else {
-					startPlay = true;
-					new PopulateList(MainActivity.this, list).execute();
+				if(randomMode){
+					new getRandomSong(MainActivity.this).execute();
+				}else{
+					//Increments the currentSong pointer.	
+					currentSong++;
+					//Checks to see
+					if (currentSong < songList.size()){
+						playSong(currentSong);
+					} else {
+						startPlay = true;
+						new PopulateList(MainActivity.this, list).execute();
+					}
+					
+					if (currentSong < 0){
+						previousButton.setEnabled(true);
+						previousButton.setBackgroundResource(R.drawable.next);
+					}
 				}
-				
-				if (currentSong < 0){
-					previousButton.setEnabled(true);
-					previousButton.setBackgroundResource(R.drawable.next);
-				}
-				
 			}
-
 		});
 	}
 	
@@ -210,33 +252,31 @@ public class MainActivity extends Activity {
 	 * sets up the listeners for the list
 	 */
 	private void setListListeners(){
-		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {	
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
 				
-				@Override
-				public void onItemClick(AdapterView<?> parent, View view,
-						int position, long id) {
-					
-					
-					playButton.setClickable(true);
-					nextButton.setClickable(true);
-					
-					playButton.setBackgroundResource(R.drawable.pause);
-					
-					if(position > 0){
-						previousButton.setBackgroundResource(R.drawable.previous);
-						previousButton.setClickable(true);
-					}
-					else{
-						previousButton.setBackgroundResource(R.drawable.previouspressed);
-						previousButton.setClickable(false);
-					}
-					
-					nextButton.setBackgroundResource(R.drawable.next);
-					
-					currentSong = position;
-					playSong(position);
+				randomMode = false;
+				playButton.setClickable(true);
+				nextButton.setClickable(true);
+				
+				playButton.setBackgroundResource(R.drawable.pause);
+				nextButton.setBackgroundResource(R.drawable.next);
+				
+				if(position > 0){
+					previousButton.setBackgroundResource(R.drawable.previous);
+					previousButton.setClickable(true);
 				}
-			});
+				else{
+					previousButton.setBackgroundResource(R.drawable.previouspressed);
+					previousButton.setClickable(false);
+				}
+				
+				currentSong = position;
+				playSong(position);
+			}
+		});
 	}
 	
 	private void setPreviousSongListeners(){
@@ -356,9 +396,65 @@ public class MainActivity extends Activity {
 		}
 	}
 	
+	class getRandomSong extends AsyncTask<Void, Void, Void>{
+		ProgressDialog progressDialog;
+		JSONObject obj;
+		public getRandomSong(MainActivity mainActivity){
+			progressDialog = new ProgressDialog(mainActivity);
+		}
+		
+		@Override
+		protected void onPreExecute(){
+			this.progressDialog.setMessage("Getting a random song!");
+			this.progressDialog.show();
+			this.progressDialog.setCancelable(false);
+		}
+		
+		@Override
+		protected Void doInBackground(Void... params){
+			try {
+				//gets a random json from url and saves it as a string;
+				getJSON gj = new getJSON();
+				String text = gj.startThread("https://ucollective.org/api/?request=audio&scope=rand");
+				obj = new JSONObject(text);
+				mp.reset();
+				//setMediaPlayerListeners();
+				//sets the source of the data to that in the JSON object under the name "file"
+				mp.setDataSource(obj.getString("file"));
+				//prepares the mediaplayer
+				mp.prepare();
+				//starts streaming the audio
+				mp.start();
+			} catch (ClientProtocolException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+		
+		@Override 
+		protected void onPostExecute(Void result){
+			try {
+				MainActivity.this.getActionBar().setTitle(this.obj.getString("title") + " - " + this.obj.getString("author"));
+				this.progressDialog.dismiss();
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+	
 	class EndlessScrollListener implements OnScrollListener {
 
-	    private int visibleThreshold = 5;
+	    private int visibleThreshold = 0;
 	    private int currentPage = 0;
 	    private int previousTotal = 0;
 	    private boolean loading = true;
@@ -380,7 +476,7 @@ public class MainActivity extends Activity {
 	                currentPage++;
 	            }
 	        }
-	        if (!loading & (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleItemCount)) {
+	        if (!loading & (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
 	            new PopulateList(MainActivity.this, list).execute();
 	            loading = true;
 	        }
