@@ -37,7 +37,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
 
-
 public class MainActivity extends Activity {
 	private MediaPlayer mp;
 	private ArrayList<Song> songList = new ArrayList<Song>();
@@ -485,6 +484,5 @@ public class MainActivity extends Activity {
 	    @Override
 	    public void onScrollStateChanged(AbsListView view, int scrollState) {
 	    }
-	}
-				
+	}			
 }

@@ -1,6 +1,7 @@
 package uCollectiveClass;
 
 import android.graphics.Bitmap;
+import android.view.View;
 
 public class Song {
 	private String songUrl;

@@ -50,7 +50,7 @@ public class ListInflator extends ArrayAdapter<Song>{
 			imageView.setImageBitmap(songList.get(position).getImage());
 			progressBar.setVisibility(view.GONE);
 		}
-			
+		
 		textSong.setText(songList.get(position).getSongTitle());
 		textArtist.setText(songList.get(position).getArtistName());
 		
