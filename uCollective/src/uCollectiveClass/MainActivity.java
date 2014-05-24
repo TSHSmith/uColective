@@ -1,8 +1,6 @@
 package uCollectiveClass;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 
 import learn2crack.customlistview.R;
@@ -16,6 +14,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,16 +25,11 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SeekBar;
-import android.widget.Toast;
-import android.app.ActionBar;
+import android.widget.TextView;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PorterDuff.Mode;
 
 public class MainActivity extends Activity {
 	private MediaPlayer mp;
@@ -46,6 +40,7 @@ public class MainActivity extends Activity {
 	private int x = 1;
 	private int count = 1;
 	private int currentSong = 0, position = 0;
+	private View v;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
@@ -58,6 +53,16 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		this.getActionBar().setDisplayShowCustomEnabled(true);
+		this.getActionBar().setDisplayShowTitleEnabled(false);
+
+		LayoutInflater inflator = LayoutInflater.from(this);
+		v = inflator.inflate(R.layout.titleview, null);
+		
+		((TextView)v.findViewById(R.id.title)).setTextColor(Color.WHITE);
+		//assign the view to the actionbar
+		this.getActionBar().setCustomView(v);
 		
 		/**
 		 * Sets up the local instances of the buttons and the list.
@@ -103,6 +108,7 @@ public class MainActivity extends Activity {
 		this.setPlayButtonListeners();
 		this.setNextButtonListeners();
 		this.setPreviousSongListeners();
+		
 	}
 	
 	@Override
@@ -309,7 +315,7 @@ public class MainActivity extends Activity {
 			mp.stop();
 			mp.reset();
 			mp.setDataSource(songList.get(index).getSongUrl());
-			getActionBar().setTitle(songList.get(index).getSongTitle());
+			((TextView)v.findViewById(R.id.title)).setText(songList.get(index).getSongTitle());
 			mp.prepare();
 			update = true;
 			mp.start();
@@ -441,7 +447,7 @@ public class MainActivity extends Activity {
 		@Override 
 		protected void onPostExecute(Void result){
 			try {
-				MainActivity.this.getActionBar().setTitle(this.obj.getString("title") + " - " + this.obj.getString("author"));
+				((TextView)v.findViewById(R.id.title)).setText(this.obj.getString("title") + " - " + this.obj.getString("author"));
 				this.progressDialog.dismiss();
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -484,5 +490,7 @@ public class MainActivity extends Activity {
 	    @Override
 	    public void onScrollStateChanged(AbsListView view, int scrollState) {
 	    }
-	}			
+	}
+	
+	
 }
