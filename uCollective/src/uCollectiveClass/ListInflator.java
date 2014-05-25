@@ -9,7 +9,8 @@ import java.util.List;
 
 
 
-import learn2crack.customlistview.R;
+
+import uCollectiveClass.gen.R;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;

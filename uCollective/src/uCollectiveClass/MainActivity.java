@@ -3,13 +3,12 @@ package uCollectiveClass;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import learn2crack.customlistview.R;
-
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import uCollectiveClass.gen.R;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
@@ -20,13 +19,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
@@ -41,11 +44,13 @@ public class MainActivity extends Activity {
 	private int count = 1;
 	private int currentSong = 0, position = 0;
 	private View v;
+	private Dialog searchPopup;
+	private Boolean searchMode = false;
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu){
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.main, menu);
+		inflater.inflate(R.menu.activity_main_actions, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	
@@ -53,15 +58,30 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
+		/**
+		 * Configure the titlebar to use a custom setup.
+		 */
 		this.getActionBar().setDisplayShowCustomEnabled(true);
 		this.getActionBar().setDisplayShowTitleEnabled(false);
 
-		LayoutInflater inflator = LayoutInflater.from(this);
-		v = inflator.inflate(R.layout.titleview, null);
+		/**
+		 * Creates the inflater.
+		 */
+		LayoutInflater inflater = LayoutInflater.from(this);
+		/**
+		 * Intialises the view using the inflater.
+		 */
+		v = inflater.inflate(R.layout.titleview, null);
 		
+		/**
+		 * Sets the colour of the text to white.
+		 */
 		((TextView)v.findViewById(R.id.title)).setTextColor(Color.WHITE);
-		//assign the view to the actionbar
+		
+		/**
+		 * Assigns the vie to the action bar.
+		 */
 		this.getActionBar().setCustomView(v);
 		
 		/**
@@ -109,10 +129,19 @@ public class MainActivity extends Activity {
 		this.setNextButtonListeners();
 		this.setPreviousSongListeners();
 		
+		this.searchPopup = new Dialog(MainActivity.this, android.R.style.Theme_Translucent);
+		this.searchPopup.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.searchPopup.setCancelable(true);
+		this.searchPopup.setContentView(R.layout.search_popup);
+		
+		this.setSearchListeners();
+		
 	}
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item){
+		boolean toReturn = false;
+		
 		switch (item.getItemId()){
 			case R.id.random_mode:
 				new getRandomSong(MainActivity.this).execute();
@@ -120,14 +149,49 @@ public class MainActivity extends Activity {
 				previousButton.setBackgroundResource(R.drawable.previouspressed);
 				previousButton.setClickable(false);
 				playButton.setClickable(true);
-				nextButton.setClickable(true);
-				
+				nextButton.setClickable(true);				
 				playButton.setBackgroundResource(R.drawable.pause);
 				nextButton.setBackgroundResource(R.drawable.next);
-				return true;
-			default:
-				return super.onOptionsItemSelected(item);
+				toReturn = true;
+				break;
+			case R.id.refresh:
+				x = 1;
+				position = 0;
+				songList.clear();
+				new PopulateList(MainActivity.this, list).execute();
+				toReturn = true;
+				searchMode = false;
+				break;
+			case R.id.search_button:
+				searchPopup.show();
 		}
+		
+		return toReturn;
+	}
+	
+	private void setSearchListeners(){
+			
+		Button cancleButton = (Button) searchPopup.findViewById(R.id.cancelBtn);
+		cancleButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				searchPopup.dismiss();
+			}
+		});
+		
+		Button searchButton = (Button) searchPopup.findViewById(R.id.searchBtn);
+		searchButton.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				EditText searchInput = (EditText) searchPopup.findViewById(R.id.searchInput);
+				String search = "https://ucollective.org/api/?request=audio&scope=search&title=" + searchInput.getText().toString();
+				position = 0;
+				searchMode = true;
+				songList.clear();
+				new PopulateList(MainActivity.this, list, search).execute();
+			}
+		});
 	}
 	
 	/**
@@ -168,6 +232,7 @@ public class MainActivity extends Activity {
 			}
 		});
 	}
+	
 	
 	/**
 	 * Sets up the listener for the next Button
@@ -346,7 +411,7 @@ public class MainActivity extends Activity {
 		Context context;
 		MainActivity mainActivity;
 		JSONArray jsonArray;
-
+		String url = "https://ucollective.org/api/?request=audio&scope=all&page=" + x;
 		ListView list;
 		
 		public PopulateList(MainActivity mainActivity, ListView list){
@@ -355,6 +420,15 @@ public class MainActivity extends Activity {
 			this.progressDialog = new ProgressDialog(this.mainActivity);
 			this.list = list;
 		}
+		
+		public PopulateList(MainActivity mainActivity, ListView list, String url){
+			this.mainActivity = mainActivity;
+			this.context = mainActivity;
+			this.progressDialog = new ProgressDialog(this.mainActivity);
+			this.list = list;
+			this.url = url;
+		}
+		
 		
 		@Override
 		protected void onPreExecute(){
@@ -384,11 +458,11 @@ public class MainActivity extends Activity {
 			try {
 
 					getJSON getjson = new getJSON();
-					String json = getjson.startThread("https://ucollective.org/api/?request=audio&scope=all&page=" + x);
+					String json = getjson.startThread(url);
 					x++;
 					this.jsonArray = new JSONArray(json);
-					for (int x = 0; x < 40; x++){
-						JSONObject currObj = this.jsonArray.getJSONObject(x);
+					for (int y = 0; x < 40; y++){
+						JSONObject currObj = this.jsonArray.getJSONObject(y);
 							songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title")));
 					}
 
@@ -414,6 +488,8 @@ public class MainActivity extends Activity {
 			this.progressDialog.show();
 			this.progressDialog.setCancelable(false);
 		}
+		
+
 		
 		@Override
 		protected Void doInBackground(Void... params){
@@ -474,23 +550,23 @@ public class MainActivity extends Activity {
 	    @Override
 	    public void onScroll(AbsListView view, int firstVisibleItem,
 	            int visibleItemCount, int totalItemCount) {
-	        if (loading) {
-	            if (totalItemCount > previousTotal) {
-	                loading = false;
-	                previousTotal = totalItemCount;
-	                currentPage++;
-	            }
-	        }
-	        if (!loading & (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
-	            new PopulateList(MainActivity.this, list).execute();
-	            loading = true;
-	        }
+	    	if(!searchMode){
+		        if (loading) {
+		            if (totalItemCount > previousTotal) {
+		                loading = false;
+		                previousTotal = totalItemCount;
+		                currentPage++;
+		            }
+		        }
+		        if (!loading & (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+		            new PopulateList(MainActivity.this, list).execute();
+		            loading = true;
+		        }
+	    	}
 	    }
 
 	    @Override
 	    public void onScrollStateChanged(AbsListView view, int scrollState) {
 	    }
 	}
-	
-	
 }
