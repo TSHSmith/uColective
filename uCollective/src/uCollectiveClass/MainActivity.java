@@ -185,7 +185,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				EditText searchInput = (EditText) searchPopup.findViewById(R.id.searchInput);
-				String search = "https://ucollective.org/api/?request=audio&scope=search&title=" + searchInput.getText().toString();
+				String search = "https://ucollective.org/api/?request=audio&scope=search&title=" + searchInput.getText().toString().replace(" ", "%20");
 				position = 0;
 				searchMode = true;
 				songList.clear();

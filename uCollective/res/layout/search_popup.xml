@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    android:layout_gravity="center"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/searchTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="My Custom Dialog"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <EditText
+        android:id="@+id/searchInput"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/searchTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp" >
+        <requestFocus />
+    </EditText>
+    <Button
+        android:id="@+id/cancelBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/searchInput"
+        android:layout_below="@+id/searchInput"
+        android:layout_marginRight="24dp"
+        android:text=" Cancel " />
+    <Button
+        android:id="@+id/searchBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/cancelBtn"
+        android:layout_alignBottom="@+id/cancelBtn"
+        android:layout_alignLeft="@+id/searchInput"
+        android:layout_marginLeft="27dp"
+        android:text="Search" />
+</RelativeLayout>
