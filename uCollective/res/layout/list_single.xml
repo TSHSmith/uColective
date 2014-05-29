@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
-android:orientation="horizontal">
+android:orientation="horizontal"
+>
 	
     <FrameLayout
         android:layout_width="wrap_content"
@@ -14,9 +15,9 @@ android:orientation="horizontal">
             android:layout_height="50dp"/>
         
         <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        	android:id="@+id/progressBar"
+        	android:layout_width="wrap_content"
+        	android:layout_height="wrap_content" />
         
 	</FrameLayout>
 

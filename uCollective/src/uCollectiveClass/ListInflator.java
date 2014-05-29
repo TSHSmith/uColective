@@ -10,6 +10,8 @@ import java.util.List;
 
 
 
+
+
 import uCollectiveClass.gen.R;
 import android.app.Activity;
 import android.content.Context;
@@ -21,6 +23,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -44,20 +48,27 @@ public class ListInflator extends ArrayAdapter<Song>{
 		
 		TextView textSong = (TextView) listView.findViewById(R.id.txt);
 		TextView textArtist = (TextView) listView.findViewById(R.id.txt2);
-		ImageView imageView = (ImageView) listView.findViewById(R.id.img);
+		ImageView avatar = (ImageView) listView.findViewById(R.id.img);
 		ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressBar);
 		
 		if(!songList.get(position).getHasImage())
-			new getImage(songList.get(position), imageView, progressBar, view.GONE).execute();
+			new getImage(songList.get(position), avatar, progressBar, view.GONE).execute();
 		else{
-			imageView.setImageBitmap(songList.get(position).getImage());
+			avatar.setImageBitmap(songList.get(position).getImage());
 			progressBar.setVisibility(view.GONE);
+			avatar.setBackground(null);
 		}
 		
 		textSong.setText(songList.get(position).getSongTitle());
 		textArtist.setText(songList.get(position).getArtistName());
 		
 		return listView;
+	}
+	
+	public void refill(ArrayList<Song> songs){
+		this.songList.clear();
+		this.songList.addAll(songs);
+		notifyDataSetChanged();
 	}
 	
 	class getImage extends AsyncTask<Void, Void, Void>{
@@ -99,7 +110,7 @@ public class ListInflator extends ArrayAdapter<Song>{
 			currSong.setHasImage(true);
 			this.progressBar.setVisibility(this.progressBarVisiblity);
 		}
-		
+
 	}
 	
 

@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="My Custom Dialog"
+        android:text="@string/searchTitle"
         android:textAppearance="?android:attr/textAppearanceMedium" />
     <EditText
         android:id="@+id/searchInput"
@@ -30,7 +30,7 @@
         android:layout_alignRight="@+id/searchInput"
         android:layout_below="@+id/searchInput"
         android:layout_marginRight="24dp"
-        android:text=" Cancel " />
+        android:text="@string/cancelSearch" />
     <Button
         android:id="@+id/searchBtn"
         android:layout_width="wrap_content"
@@ -39,5 +39,5 @@
         android:layout_alignBottom="@+id/cancelBtn"
         android:layout_alignLeft="@+id/searchInput"
         android:layout_marginLeft="27dp"
-        android:text="Search" />
+        android:text="@string/performSearch" />
 </RelativeLayout>

@@ -129,12 +129,16 @@ public class MainActivity extends Activity {
 		this.setNextButtonListeners();
 		this.setPreviousSongListeners();
 		
-		this.searchPopup = new Dialog(MainActivity.this, android.R.style.Theme_Translucent);
+		this.searchPopup = new Dialog(MainActivity.this, android.R.style.Theme_Light_NoTitleBar);
 		this.searchPopup.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.searchPopup.setCancelable(true);
 		this.searchPopup.setContentView(R.layout.search_popup);
 		
 		this.setSearchListeners();
+		
+		ListInflator adapter = new ListInflator(this, songList);
+		list.setAdapter(adapter);
+		list.setOnScrollListener(new EndlessScrollListener());
 		
 	}
 	
@@ -189,6 +193,7 @@ public class MainActivity extends Activity {
 				position = 0;
 				searchMode = true;
 				songList.clear();
+				searchPopup.dismiss();
 				new PopulateList(MainActivity.this, list, search).execute();
 			}
 		});
@@ -347,6 +352,7 @@ public class MainActivity extends Activity {
 				playSong(position);
 			}
 		});
+		
 	}
 	
 	private void setPreviousSongListeners(){
@@ -440,11 +446,8 @@ public class MainActivity extends Activity {
 
 		@Override
 		protected void onPostExecute(Void unused){
-			ListInflator adapter = new ListInflator(this.mainActivity, songList);
-			list.setAdapter(adapter);
-			list.setOnScrollListener(new EndlessScrollListener());
+			
 			list.setSelection(position);
-			position += 40;
 			
 			if(startPlay){	
 				playSong(currentSong);
@@ -456,21 +459,20 @@ public class MainActivity extends Activity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			try {
-
+					position = list.getFirstVisiblePosition() + 1;
 					getJSON getjson = new getJSON();
 					String json = getjson.startThread(url);
 					x++;
 					this.jsonArray = new JSONArray(json);
-					for (int y = 0; x < 40; y++){
+					for (int y = 0; y < 40; y++){
 						JSONObject currObj = this.jsonArray.getJSONObject(y);
-							songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title")));
+						songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title")));
 					}
 
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
 			return null;
 		}
 	}

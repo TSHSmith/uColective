@@ -4,5 +4,8 @@
     <string name="app_name">µCollective</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="cancelSearch">Cancel</string>
+    <string name="performSearch">Search</string>
+    <string name="searchTitle">Search by Song Title</string>
 
 </resources>
