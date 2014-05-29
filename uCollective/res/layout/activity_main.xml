@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -8,42 +8,56 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity"
      >
-    
-    <ListView
-        android:id="@+id/list"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/playButton"
-        android:layout_marginBottom="10dp"
-        android:scrollbarThumbVertical="@drawable/custom_scroller"
-        >
-        
-    </ListView>
-    
-    <Button
-        android:id="@+id/playButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
 
-    <Button
-        android:id="@+id/previousSong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/playButton"
-        android:layout_alignBottom="@+id/playButton"
-        android:layout_toLeftOf="@+id/playButton" />
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:scrollbarThumbVertical="@drawable/custom_scroller" >
+
+        </ListView>
+
+        <SlidingDrawer
+            android:id="@+id/slidingDrawer1"
+            android:layout_width="match_parent"
+            android:layout_height="75dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:content="@+id/content"
+            android:handle="@+id/handle" >
+
+            <Button
+                android:id="@+id/handle"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:text="Handle" />
+
+            <LinearLayout
+                android:id="@+id/content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal" >
+
+                <Button
+                    android:id="@+id/previousSong"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/playButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/nextSong"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </SlidingDrawer>
+
+    </RelativeLayout>
 
 
-    <Button
-        android:id="@+id/nextSong"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/list"
-        android:layout_toRightOf="@+id/playButton" />
-
-
-
-
-</RelativeLayout>

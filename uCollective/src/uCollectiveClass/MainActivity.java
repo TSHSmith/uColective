@@ -27,11 +27,13 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SlidingDrawer;
 import android.widget.TextView;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 
 public class MainActivity extends Activity {
@@ -83,6 +85,8 @@ public class MainActivity extends Activity {
 		 * Assigns the vie to the action bar.
 		 */
 		this.getActionBar().setCustomView(v);
+		
+		
 		
 		/**
 		 * Sets up the local instances of the buttons and the list.
@@ -327,7 +331,9 @@ public class MainActivity extends Activity {
 	 * sets up the listeners for the list
 	 */
 	private void setListListeners(){
+		//Single tap will play the selected song
 		list.setOnItemClickListener(new AdapterView.OnItemClickListener() {	
+
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
@@ -338,6 +344,9 @@ public class MainActivity extends Activity {
 				
 				playButton.setBackgroundResource(R.drawable.pause);
 				nextButton.setBackgroundResource(R.drawable.next);
+				
+				SlidingDrawer sd = (SlidingDrawer)findViewById(R.id.slidingDrawer1);
+				sd.open();
 				
 				if(position > 0){
 					previousButton.setBackgroundResource(R.drawable.previous);
@@ -353,6 +362,20 @@ public class MainActivity extends Activity {
 			}
 		});
 		
+		//A hold will open a new dialog that will show the songs info.
+		list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				mp.pause();
+				playButton.setBackgroundResource(R.drawable.pause);
+				Intent intent = new Intent(MainActivity.this, SongActivity.class);
+			    startActivity(intent);
+
+				return false;
+			}
+		});
 	}
 	
 	private void setPreviousSongListeners(){
@@ -390,6 +413,8 @@ public class MainActivity extends Activity {
 			mp.prepare();
 			update = true;
 			mp.start();
+			
+			
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -534,7 +559,7 @@ public class MainActivity extends Activity {
 			
 		}
 	}
-	
+		
 	class EndlessScrollListener implements OnScrollListener {
 
 	    private int visibleThreshold = 0;

@@ -7,5 +7,7 @@
     <string name="cancelSearch">Cancel</string>
     <string name="performSearch">Search</string>
     <string name="searchTitle">Search by Song Title</string>
+    <string name="title_activity_song_info">SongInfo</string>
+    <string name="title_activity_song">SongActivity</string>
 
 </resources>
