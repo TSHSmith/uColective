@@ -21,8 +21,10 @@ android:orientation="horizontal"
         
 	</FrameLayout>
 
+
+
 	<LinearLayout
-	    android:layout_width="fill_parent"
+	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    android:orientation="vertical">
 	    
@@ -38,5 +40,11 @@ android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp" />
+        
+           	 
        </LinearLayout>
+       
+
+       
+	
 </LinearLayout>

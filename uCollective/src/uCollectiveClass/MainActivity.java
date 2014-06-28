@@ -29,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SlidingDrawer;
 import android.widget.TextView;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -142,7 +143,7 @@ public class MainActivity extends Activity {
 		
 		ListInflator adapter = new ListInflator(this, songList);
 		list.setAdapter(adapter);
-		list.setOnScrollListener(new EndlessScrollListener());
+		list.setOnScrollListener(new EndlessScrollListener(getActionBar()));
 		
 	}
 	
@@ -345,8 +346,7 @@ public class MainActivity extends Activity {
 				playButton.setBackgroundResource(R.drawable.pause);
 				nextButton.setBackgroundResource(R.drawable.next);
 				
-				SlidingDrawer sd = (SlidingDrawer)findViewById(R.id.slidingDrawer1);
-				sd.open();
+				openDrawer();
 				
 				if(position > 0){
 					previousButton.setBackgroundResource(R.drawable.previous);
@@ -370,13 +370,30 @@ public class MainActivity extends Activity {
 					int position, long id) {
 				mp.pause();
 				playButton.setBackgroundResource(R.drawable.pause);
+				
+				openDrawer();
+				
 				Intent intent = new Intent(MainActivity.this, SongActivity.class);
+				Song currSong = new Song(songList.get(position));
+				intent.putExtra("song", currSong);
 			    startActivity(intent);
 
 				return false;
 			}
 		});
+		
+
 	}
+	
+	/**
+	 * Opens the drawer and displays the pause/play, next and previous songs.
+	 */
+	private void openDrawer(){
+		//Don't like the use of a sliding drawer because it's an depreciated class - looking into alternatives.
+		SlidingDrawer sd = (SlidingDrawer)findViewById(R.id.slidingDrawer1);
+		sd.open();
+	}
+	
 	
 	private void setPreviousSongListeners(){
 		previousButton.setOnTouchListener(new View.OnTouchListener() {
@@ -491,7 +508,7 @@ public class MainActivity extends Activity {
 					this.jsonArray = new JSONArray(json);
 					for (int y = 0; y < 40; y++){
 						JSONObject currObj = this.jsonArray.getJSONObject(y);
-						songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title")));
+						songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title"), currObj.getString("description")));
 					}
 
 			} catch (JSONException e) {
@@ -566,12 +583,16 @@ public class MainActivity extends Activity {
 	    private int currentPage = 0;
 	    private int previousTotal = 0;
 	    private boolean loading = true;
+	    private int prevVisibleItem = 0;
+	    private ActionBar actionBar;
 
-	    public EndlessScrollListener() {
+	    public EndlessScrollListener(ActionBar actionBar) {
+	    	this.actionBar = actionBar;
 	    }
 	    
-	    public EndlessScrollListener(int visibleThreshold) {
+	    public EndlessScrollListener(int visibleThreshold, ActionBar actionBar) {
 	        this.visibleThreshold = visibleThreshold;
+	        this.actionBar = actionBar;
 	    }
 
 	    @Override
@@ -590,6 +611,15 @@ public class MainActivity extends Activity {
 		            loading = true;
 		        }
 	    	}
+	    	
+	    	 if(prevVisibleItem != firstVisibleItem){
+	    		    if(prevVisibleItem < firstVisibleItem)
+	    		    	actionBar.hide();
+	    		    else
+	    		    	actionBar.show();
+
+	    		  prevVisibleItem = firstVisibleItem;
+	    	 }
 	    }
 
 	    @Override
