@@ -2,6 +2,8 @@ package uCollectiveClass;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
@@ -13,6 +15,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -508,7 +511,8 @@ public class MainActivity extends Activity {
 					this.jsonArray = new JSONArray(json);
 					for (int y = 0; y < 40; y++){
 						JSONObject currObj = this.jsonArray.getJSONObject(y);
-						songList.add(new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title"), currObj.getString("description")));
+						Song currSong = new Song(currObj.getString("file"), currObj.getString("avatar"), currObj.getString("author"), currObj.getString("title"), currObj.getString("description"));
+						songList.add(currSong);
 					}
 
 			} catch (JSONException e) {
@@ -626,4 +630,5 @@ public class MainActivity extends Activity {
 	    public void onScrollStateChanged(AbsListView view, int scrollState) {
 	    }
 	}
+		
 }

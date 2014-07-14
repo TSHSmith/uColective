@@ -30,6 +30,7 @@ public class SongActivity extends Activity {
 		Intent intent = getIntent();
 		Song song = (Song) intent.getSerializableExtra("song");
 		
+		this.getActionBar().hide();
 		
 		ImageView avatar = (ImageView) findViewById(R.id.avartar);
 		ProgressBar pd = (ProgressBar) findViewById(R.id.iconDownload);

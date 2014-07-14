@@ -27,6 +27,7 @@ public class Song implements Serializable{
 		this.imageUrl = song.getImageUrl();
 		this.artistName = song.getArtistName();
 		this.songTitle = song.getSongTitle();
+		this.description = song.getDescription();
 	}
 
 	public String getSongTitle(){
