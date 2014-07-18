@@ -86,7 +86,7 @@ public class MainActivity extends Activity {
 		((TextView)v.findViewById(R.id.title)).setTextColor(Color.WHITE);
 		
 		/**
-		 * Assigns the vie to the action bar.
+		 * Assigns the view to the action bar.
 		 */
 		this.getActionBar().setCustomView(v);
 		
@@ -137,6 +137,9 @@ public class MainActivity extends Activity {
 		this.setNextButtonListeners();
 		this.setPreviousSongListeners();
 		
+		/**
+		 * Condfigures the search popup
+		 */
 		this.searchPopup = new Dialog(MainActivity.this, android.R.style.Theme_Light_NoTitleBar);
 		this.searchPopup.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		this.searchPopup.setCancelable(true);
@@ -144,6 +147,9 @@ public class MainActivity extends Activity {
 		
 		this.setSearchListeners();
 		
+		/**
+		 * Sets up the list inflators.
+		 */
 		ListInflator adapter = new ListInflator(this, songList);
 		list.setAdapter(adapter);
 		list.setOnScrollListener(new EndlessScrollListener(getActionBar()));
@@ -492,7 +498,10 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onPostExecute(Void unused){
 			
-			list.setSelection(position);
+			if(position == 1)
+				list.setSelection(0);
+			else
+				list.setSelection(position);
 			
 			if(startPlay){	
 				playSong(currentSong);

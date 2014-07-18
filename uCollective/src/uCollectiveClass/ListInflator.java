@@ -44,7 +44,9 @@ public class ListInflator extends ArrayAdapter<Song>{
 	@Override
 	public View getView(final int position, View view, ViewGroup parent){
 		LayoutInflater inflater = context.getLayoutInflater();
-		View listView = inflater.inflate(R.layout.list_single, null, true);
+		View listView;
+		if (position >= 1){
+		listView = inflater.inflate(R.layout.list_single, null, true);
 		
 		TextView textSong = (TextView) listView.findViewById(R.id.txt);
 		TextView textArtist = (TextView) listView.findViewById(R.id.txt2);
@@ -52,15 +54,18 @@ public class ListInflator extends ArrayAdapter<Song>{
 		ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressBar);
 		
 		if(!songList.get(position).getHasImage())
-			new getImage(songList.get(position), avatar, progressBar, view.GONE).execute();
+			new getImage(songList.get(position - 1), avatar, progressBar, view.GONE).execute();
 		else{
-			avatar.setImageBitmap(songList.get(position).getImage());
+			avatar.setImageBitmap(songList.get(position - 1).getImage());
 			progressBar.setVisibility(view.GONE);
 			avatar.setBackground(null);
 		}
 		
 		textSong.setText(songList.get(position).getSongTitle());
 		textArtist.setText(songList.get(position).getArtistName());
+		} else {
+			listView = inflater.inflate(R.layout.empty_item, null, true);
+		}
 		
 		return listView;
 	}
